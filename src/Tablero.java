@@ -118,6 +118,10 @@ public class Tablero {
     {
         System.out.println("FUNDACIONES");
         for (int i = 0; i < 4; ++i) {
+            System.out.print("  " + (i+1) + "   ");
+        }
+        System.out.println();
+        for (int i = 0; i < 4; ++i) {
             if (fundaciones.get(i).pilaVacia()) {
                 System.out.print("[   ] ");
             } else {
@@ -127,6 +131,10 @@ public class Tablero {
         }
         System.out.println();
         System.out.println("FREE CELLS");
+        for (int i = 0; i < 4; ++i) {
+            System.out.print(" " + (i+1) + "   ");
+        }
+        System.out.println();
         for (int i = 0; i < 4; ++i) {
             if (freeCells.get(i).getValor() == -1) {
                 System.out.print("[   ] ");
@@ -140,5 +148,22 @@ public class Tablero {
         for (int i = 0;i < 8; ++i) {
             System.out.println((i+1) + "]" + tableau.get(i).mostrar());
         }
+    }
+
+    /**
+     * Metodo para localizar la carta en todas las cascadas y regresa en que cascada se encuentra
+     * @param carta
+     * @return
+     */
+    public int localizarCartaTableau(Carta carta) {
+
+        for (int i = 0; i < tableau.size(); ++i) {
+            ListaSimple<Carta> fundacion = tableau.get(i);
+
+            if (fundacion.buscar(carta)) {
+                return i;
+            }
+        }
+        return -1;
     }
 }
