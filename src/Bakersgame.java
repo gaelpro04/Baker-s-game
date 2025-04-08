@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Bakersgame {
@@ -6,12 +7,16 @@ public class Bakersgame {
     private Baraja baraja;
     private Tablero tablero;
     private Pila<Carta> undo;
+    private Pila<Integer> undoNumeroLugar;
+    private Pila<String> undoLugar;
 
     public Bakersgame()
     {
         baraja = new Baraja();
         tablero = new Tablero();
-        undo = new Pila<>();
+        undo = new Pila<>(10000);
+        undoLugar = new Pila<>(10000);
+        undoNumeroLugar = new Pila<>(100000);
     }
 
     public void iniciarJuego()
@@ -19,7 +24,7 @@ public class Bakersgame {
         String opcion;
         Scanner scanner = new Scanner(System.in);
         System.out.println("Baker's Game!!=================");
-        while (!determinarCartasNoDisp()) {
+        while (!determinarCartasNoDisp() && !determinarVictoria()) {
 
             tablero.actualizarAses();
             tablero.mostrarTablero();
@@ -65,7 +70,9 @@ public class Bakersgame {
                             case "c":
                                 System.out.println("Ingresa a que free cell lo quieres ingresar");
                                 if (freCellYTableau(cartaTemp, "tableau", scanner.nextInt())) {
-
+                                    System.out.println("Movimiento exitoso");
+                                } else {
+                                    System.out.println("Movimiento invalido");
                                 }
                                 break;
                         }
@@ -112,16 +119,87 @@ public class Bakersgame {
                     }
                     break;
                 case "c":
-                    System.out.println("c");
+                    if (undo()) {
+                        System.out.println("Undo hecho");
+                    } else {
+                        System.out.println("Undo invalido");
+                    }
                     break;
                 case "d":
-                    System.out.println("d");
+                    baraja = new Baraja();
+                    tablero = new Tablero();
+                    undo = new Pila<>(10000);
+                    undoLugar = new Pila<>(10000);
+                    undoNumeroLugar = new Pila<>(100000);
                     break;
                 default:
                     System.out.println("Invalido");
             }
         }
+
+        if (determinarCartasNoDisp()) {
+            System.out.println("Has perdido!!!!");
+        } else if (determinarVictoria()) {
+            System.out.println("Has ganado!!!!1");
+        }
     }
+
+    /**
+     * Metodo que simula el undo en el juego
+     * @return
+     */
+    public boolean undo()
+    {
+        if (!undo.pilaVacia()) {
+            if (localizarCarta(undo.peek()).equals("tableau")) {
+                if (undoLugar.peek().equals("tableau")) {
+                    tablero.getTableau().get(tablero.localizarCartaTableau(undo.peek())).eliminarFin();
+                    tablero.getTableau().get(undoNumeroLugar.pop()).insertarFin(undo.pop());
+                    undoLugar.pop();
+                    return true;
+                } else if (undoLugar.peek().equals("freecell")) {
+                    tablero.getTableau().get(tablero.localizarCartaTableau(undo.peek())).eliminarFin();
+                    if (tablero.getFreeCells().get(undoNumeroLugar.peek()) == null || tablero.getFreeCells().get(undoNumeroLugar.peek()).getValor() == -1) {
+                        tablero.getFreeCells().add(undoNumeroLugar.pop(), undo.pop());
+                        undoLugar.pop();
+                        return true;
+                    }
+                }
+            } else if (localizarCarta(undo.peek()).equals("freecell")) {
+                for (int i = 0; i < tablero.getFreeCells().size(); i++) {
+                    if (undo.peek().equals(tablero.getFreeCells().get(i))) {
+                        tablero.getFreeCells().remove(i);
+                        break;
+                    }
+                }
+                if (undoLugar.peek().equals("tableau")) {
+                    tablero.getTableau().get(undoNumeroLugar.pop()).insertarFin(undo.pop());
+                    undoLugar.pop();
+                    return true;
+                }
+
+            } else if (localizarCarta(undo.peek()).equals("fundacion")) {
+                for (int i = 0; i < tablero.getFundaciones().size(); i++) {
+                    if (tablero.getFundaciones().get(i).peek().equals(undo.peek())) {
+                        tablero.getFundaciones().get(i).pop();
+                        break;
+                    }
+                }
+
+                if (undoLugar.peek().equals("tableau")) {
+                    tablero.getTableau().get(undoNumeroLugar.pop()).insertarFin(undo.pop());
+                    undoLugar.pop();
+                    return true;
+                } else if (undoLugar.peek().equals("freecell")) {
+                    tablero.getFreeCells().add(undoNumeroLugar.pop(), undo.pop());
+                    undoLugar.pop();
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 
     /**
      * Metodo que simula Hint del juego, devuelve la carta a mover y en que carta colocar
@@ -218,6 +296,15 @@ public class Bakersgame {
             }
         }
 
+        //Este ciclo solamente se accede si se usa undo
+        for (int i = 0; i < 4; ++i) {
+            Pila<Carta> fundacion = tablero.getFundaciones().get(i);
+
+            if (fundacion.peek().equals(carta)) {
+                return "fundacion";
+            }
+        }
+
         return "null";
     }
 
@@ -229,7 +316,11 @@ public class Bakersgame {
             ListaSimple<Carta> cascada = tablero.getTableau().get(tablero.localizarCartaTableau(carta));
 
             if (cascada.visualizarFin().equals(carta) && tablero.getFreeCells().get(indexDestino).getValor() == -1) {
+                undo.push(cascada.visualizarFin());
+                undoNumeroLugar.push(tablero.localizarCartaTableau(carta));
+                undoLugar.push("tableau");
                 tablero.getFreeCells().add(indexDestino, cascada.eliminarFin());
+
                 return true;
             } else {
                 System.out.println("No se puede meter al free cell");
@@ -240,6 +331,9 @@ public class Bakersgame {
             for (int i = 0; i < tablero.getFreeCells().size(); ++i) {
                 if (tablero.getFreeCells().get(i).equals(carta)) {
                     if (esSecuencialCon(cascada.visualizarFin(), carta)) {
+                        undo.push(tablero.getFreeCells().get(i));
+                        undoNumeroLugar.push(i);
+                        undoLugar.push("freecell");
                         cascada.insertarFin(tablero.getFreeCells().remove(i));
                         return true;
                     } else {
@@ -260,6 +354,9 @@ public class Bakersgame {
             if (fundacion.pilaVacia() && carta.getValor() == 1) {
                 for (int i = 0; i < tablero.getFreeCells().size(); ++i) {
                     if (tablero.getFreeCells().get(i).equals(carta)) {
+                        undo.push(tablero.getFreeCells().get(i));
+                        undoNumeroLugar.push(i);
+                        undoLugar.push("freecell");
                         fundacion.push(tablero.getFreeCells().remove(i));
                         return true;
                     }
@@ -268,6 +365,9 @@ public class Bakersgame {
                 //Localizar la carta que saco el usuario
                 for (int i = 0; i < tablero.getFreeCells().size(); ++i) {
                     if (tablero.getFreeCells().get(i).equals(carta)) {
+                        undo.push(tablero.getFreeCells().get(i));
+                        undoNumeroLugar.push(i);
+                        undoLugar.push("freecell");
                         fundacion.push(tablero.getFreeCells().remove(i));
                         return true;
                     }
@@ -276,9 +376,15 @@ public class Bakersgame {
         } else if (localizarCarta(carta).equals("tableau")) {
             ListaSimple<Carta> cascada = tablero.getTableau().get(tablero.localizarCartaTableau(carta));
             if (fundacion.pilaVacia() && carta.getValor() == 1 && cascada.visualizarFin().equals(carta)) {
+                undo.push(cascada.visualizarFin());
+                undoNumeroLugar.push(tablero.localizarCartaTableau(carta));
+                undoLugar.push("tableau");
                 fundacion.push(cascada.eliminarFin());
                 return true;
             } else if (!fundacion.pilaVacia() && esSecuencialCon(carta, fundacion.peek()) && cascada.visualizarFin().equals(carta)) {
+                undo.push(cascada.visualizarFin());
+                undoNumeroLugar.push(tablero.localizarCartaTableau(carta));
+                undoLugar.push("tableau");
                 fundacion.push(cascada.eliminarFin());
                 return true;
             } else {
@@ -316,6 +422,9 @@ public class Bakersgame {
                 //Se obtiene la primer carta de donde se quiere eliminar.
                 Carta actual = cascada.eliminarFin();
                 cascadaMovimiento.insertarInicio(actual);
+                undo.push(actual);
+                undoNumeroLugar.push(i);
+                undoLugar.push("tableau");
 
                 //Mientras que la carta actual no sea igual a la que se identificó(en algún punto llegará)
                 while (!actual.equals(carta)) {
@@ -327,6 +436,9 @@ public class Bakersgame {
                         //Si se cimple la carte eliminada será la nueva actual y se mete a la cascada o carta que se moverá
                         actual = cascada.eliminarFin();
                         cascadaMovimiento.insertarInicio(actual);
+                        undo.push(actual);
+                        undoNumeroLugar.push(i);
+                        undoLugar.push("tableau");
                     } else {
                         return false;
                     }
@@ -419,17 +531,12 @@ public class Bakersgame {
 
     public boolean determinarCartasNoDisp()
     {
-        boolean aja = false;
-
-
-
-
-        return aja;
+        return tablero.freeCellsLlenas() && hint().listaVacia();
     }
 
-    public void moverCarta()
+    public boolean determinarVictoria()
     {
-
+        return tablero.FundacionesOrdenadas();
     }
 
     public boolean esSecuencialCon(Carta superior, Carta inferior) {

@@ -166,4 +166,31 @@ public class Tablero {
         }
         return -1;
     }
+
+    /**
+     * Metodo para saber si las free cells estan llenas
+     */
+    public boolean freeCellsLlenas()
+    {
+        int contador = 0;
+        for (int i = 0; i < freeCells.size(); i++) {
+            if (freeCells.get(i).getValor() >= 1) {
+                ++contador;
+            }
+        }
+
+        return contador == 4;
+    }
+
+    public boolean FundacionesOrdenadas()
+    {
+        int contador = 0;
+        for (int i = 0; i < fundaciones.size(); i++) {
+            if (fundaciones.get(i).tamano() == 13) {
+                ++contador;
+            }
+        }
+
+        return contador == 4;
+    }
 }

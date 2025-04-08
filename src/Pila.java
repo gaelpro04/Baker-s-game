@@ -96,4 +96,8 @@ public class Pila<T> {
         }
         return objeto;
     }
+
+    public int tamano() {
+        return tope + 1;
+    }
 }
