@@ -11,9 +11,9 @@ public class Tablero {
     /**
      * Constructor preteminado donde inicializamos los atributos y se hace la incersión de cartas en el tableua
      */
-    public Tablero()
+    public Tablero(Baraja baraja)
     {
-        baraja = new Baraja();
+        this.baraja = baraja;
         baraja.revolver();
         freeCells = new ArrayList<>(4);
         for (int i = 0; i < 4; ++i) {

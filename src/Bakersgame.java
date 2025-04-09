@@ -10,10 +10,10 @@ public class Bakersgame {
     private Pila<Integer> undoNumeroLugar;
     private Pila<String> undoLugar;
 
-    public Bakersgame()
+    public Bakersgame(Baraja baraja)
     {
-        baraja = new Baraja();
-        tablero = new Tablero();
+        this.baraja = baraja;
+        tablero = new Tablero(this.baraja);
         undo = new Pila<>(10000);
         undoLugar = new Pila<>(10000);
         undoNumeroLugar = new Pila<>(100000);
@@ -126,8 +126,7 @@ public class Bakersgame {
                     }
                     break;
                 case "d":
-                    baraja = new Baraja();
-                    tablero = new Tablero();
+                    tablero = new Tablero(baraja);
                     undo = new Pila<>(10000);
                     undoLugar = new Pila<>(10000);
                     undoNumeroLugar = new Pila<>(100000);
@@ -542,5 +541,40 @@ public class Bakersgame {
     public boolean esSecuencialCon(Carta superior, Carta inferior) {
         return superior.getValor() == inferior.getValor() + 1 &&
                 superior.getPalo().equals(inferior.getPalo());
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Area de getters y setters
+
+    public Tablero getTablero() {
+        return tablero;
+    }
+
+    public void setTablero(Tablero tablero) {
+        this.tablero = tablero;
+    }
+
+    public Pila<Carta> getUndo() {
+        return undo;
+    }
+
+    public void setUndo(Pila<Carta> undo) {
+        this.undo = undo;
+    }
+
+    public Pila<Integer> getUndoNumeroLugar() {
+        return undoNumeroLugar;
+    }
+
+    public void setUndoNumeroLugar(Pila<Integer> undoNumeroLugar) {
+        this.undoNumeroLugar = undoNumeroLugar;
+    }
+
+    public Pila<String> getUndoLugar() {
+        return undoLugar;
+    }
+
+    public void setUndoLugar(Pila<String> undoLugar) {
+        this.undoLugar = undoLugar;
     }
 }

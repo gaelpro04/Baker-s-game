@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -16,8 +17,12 @@ public class Baraja {
     {
         //Inicialización de la baraja junto a su generación
         baraja = new ListaDobleCircular<>();
+        String[] palos = {"diamonds", "hearts", "clubs", "spades"};
         for (int i = 0; i < 4; ++i) {
+            String palo = palos[i];
             for (int j = 0; j < 13; ++j) {
+                Carta carta = new Carta((j+1), palos[i]);
+                carta.setImagen(new ImageIcon(crearURL(j,palo)), 100, 140);
                 baraja.insertarFin(new Carta((j+1), palos[i]));
             }
         }
@@ -108,5 +113,20 @@ public class Baraja {
 
         //Por ultimo se regresan las cascadas
         return cascadas;
+    }
+
+    public Carta sacarInicio()
+    {
+        return baraja.eliminarInicio();
+    }
+
+    public Carta sacarFin()
+    {
+        return baraja.eliminarFin();
+    }
+
+    private String crearURL(int i, String palo)
+    {
+        return "C:\\Users\\Usuario\\IdeaProjects\\Baker-s-game\\PNG-cards-1.3\\"+ i +"_of_"+ palo +".png";
     }
 }
