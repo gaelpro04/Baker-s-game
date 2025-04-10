@@ -127,7 +127,8 @@ public class Baraja {
 
     private String crearURL(int i, String palo)
     {
-        return "C:\\Users\\sgsg_\\IdeaProjects\\Baker-s-game\\PNG-cards-1.3\\" + i + "_of_"+ palo + ".png";
+         return "C:\\Users\\Usuario\\IdeaProjects\\Baker-s-game\\PNG-cards-1.3\\" + i + "_of_"+ palo + ".png";
+        // return "C:\\Users\\sgsg_\\IdeaProjects\\Baker-s-game\\PNG-cards-1.3\\" + i + "_of_"+ palo + ".png";
     }
 
     public void probarBaraja()
