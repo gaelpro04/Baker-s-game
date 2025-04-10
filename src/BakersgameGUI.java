@@ -3,6 +3,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class BakersgameGUI {
 
@@ -10,8 +11,9 @@ public class BakersgameGUI {
     private Bakersgame bakersgame;
     private Baraja baraja;
     private ArrayList<JLabel> posicionesFreeCell;
-    private ArrayList<JLabel> posicionesFundaciones;
+    private ArrayList<ArrayList<JLabel>> posicionesFundaciones;
     private ArrayList<ArrayList<JLabel>> posicionesCascadas;
+    private ArrayList<Carta> origenDestino;
 
     //Atributos GUI
     private Color colorPoker;
@@ -24,8 +26,8 @@ public class BakersgameGUI {
     {
         colorPoker = new Color(53,94,59);
         baraja = new Baraja();
-        barajaGUI = new BarajaGUI(baraja);
         bakersgame = new Bakersgame(baraja);
+        origenDestino = new ArrayList<>(2);
 
         frame = new JFrame("Baker's Game");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -85,7 +87,20 @@ public class BakersgameGUI {
             labelFC.addMouseListener(new MouseListener() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    System.out.println("SEXOOOOOOOOOOOO");
+                    JLabel labelPresionado = (JLabel) e.getSource();
+                    origenDestino.add(identificarCarta((ImageIcon) labelPresionado.getIcon()));
+                    if (origenDestino.size() == 2) {
+
+                        int indiceFC = -1;
+                        for (int i = 0; i < 4; ++i) {
+                            if (labelPresionado.equals(posicionesFreeCell.get(i))) {
+                                indiceFC = i;
+                            }
+                        }
+
+                        moverCarta(origenDestino.getFirst(), origenDestino.get(1), indiceFC,"freecell");
+                        origenDestino.clear();
+                    }
                 }
 
                 @Override
@@ -126,40 +141,58 @@ public class BakersgameGUI {
         posicionesFundaciones = new ArrayList<>(4);
 
         for (int i = 0; i < 4; ++i) {
-            JLabel labelF = new JLabel();
-            labelF.setOpaque(true);
-            labelF.setBorder(BorderFactory.createLineBorder(new Color(1,50,32)));
-            labelF.setBackground(colorPoker);
-            labelF.setPreferredSize(new Dimension(100,140));
-            labelF.addMouseListener(new MouseListener() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    System.out.println("NOSEXOOOOOOOOOOOOOOO");
-                }
+            posicionesFundaciones.add(new ArrayList<>(13));
+            for (int j = 0; j < 13; ++j) {
+                JLabel labelF = new JLabel();
+                labelF.setOpaque(true);
+                labelF.setBorder(BorderFactory.createLineBorder(new Color(1,50,32)));
+                labelF.setBackground(colorPoker);
+                labelF.setPreferredSize(new Dimension(100,140));
+                labelF.addMouseListener(new MouseListener() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        JLabel labelPresionado = (JLabel) e.getSource();
+                        origenDestino.add(identificarCarta((ImageIcon) labelPresionado.getIcon()));
+                        if (origenDestino.size() == 2) {
 
-                @Override
-                public void mousePressed(MouseEvent e) {
+                            int indiceFunda = -1;
+                            for (int i = 0; i < posicionesFundaciones.size(); ++i) {
+                                ArrayList<JLabel> fundacion = posicionesFundaciones.get(i);
+                                for (int j = 0; j < fundacion.size(); ++j) {
+                                    if (labelPresionado.equals(fundacion.get(j))) {
+                                        indiceFunda = i;
+                                        break;
+                                    }
+                                }
+                            }
+                            moverCarta(origenDestino.getFirst(), origenDestino.get(1), indiceFunda, "fundacion");
+                            origenDestino.clear();
+                        }
+                    }
 
-                }
+                    @Override
+                    public void mousePressed(MouseEvent e) {
 
-                @Override
-                public void mouseReleased(MouseEvent e) {
+                    }
 
-                }
+                    @Override
+                    public void mouseReleased(MouseEvent e) {
 
-                @Override
-                public void mouseEntered(MouseEvent e) {
+                    }
 
-                }
+                    @Override
+                    public void mouseEntered(MouseEvent e) {
 
-                @Override
-                public void mouseExited(MouseEvent e) {
+                    }
 
-                }
-            });
-            posicionesFundaciones.add(labelF);
+                    @Override
+                    public void mouseExited(MouseEvent e) {
 
-            panelFundaciones.add(labelF, gbc);
+                    }
+                });
+                posicionesFundaciones.get(i).add(labelF);
+                panelFundaciones.add(labelF, gbc);
+            }
             ++gbc.gridx;
         }
         gbc.gridx = 0;
@@ -175,9 +208,9 @@ public class BakersgameGUI {
 
         for (int i = 0; i < 8; ++i) {
             if (i < 4) {
-                posicionesCascadas.add(new ArrayList<>(7));
+                posicionesCascadas.add(new ArrayList<>());
             } else {
-                posicionesCascadas.add(new ArrayList<>(6));
+                posicionesCascadas.add(new ArrayList<>());
             }
         }
 
@@ -187,7 +220,7 @@ public class BakersgameGUI {
             ArrayList<JLabel> posicionCascada = posicionesCascadas.get(i);
 
             if (i < 4) {
-                for (int j = 0; j < 7; ++j) {
+                for (int j = 6; j >= 0; --j) {
                     JLabel labelCas = new JLabel();
                     if (j == 6) {
                         labelCas.setBorder(BorderFactory.createLineBorder(new Color(1,50,32)));
@@ -198,7 +231,25 @@ public class BakersgameGUI {
                     labelCas.addMouseListener(new MouseListener() {
                         @Override
                         public void mouseClicked(MouseEvent e) {
-                            System.out.println("SEXOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
+                            JLabel labelPresionado = (JLabel) e.getSource();
+                            origenDestino.add(identificarCarta((ImageIcon) labelPresionado.getIcon()));
+                            if (origenDestino.size() == 2) {
+
+                                int indiceDestino = -1;
+                                for (int i = 0; i < posicionesFundaciones.size(); ++i) {
+                                    ArrayList<JLabel> labels = posicionesCascadas.get(i);
+                                    for (int j = 0; j < labels.size(); ++j) {
+                                        if (labelPresionado.equals(labels.get(j))) {
+                                            indiceDestino = i;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                moverCarta(origenDestino.getFirst(), origenDestino.get(1),indiceDestino,"tableau");
+                                origenDestino.clear();
+                            }
+
                         }
 
                         @Override
@@ -226,7 +277,7 @@ public class BakersgameGUI {
                     mulY = mulY + 45;
                 }
             } else {
-                for (int j = 0; j < 6; ++j) {
+                for (int j = 5; j >= 0; --j) {
                     JLabel labelCas = new JLabel();
                     if (j == 5) {
                         labelCas.setBorder(BorderFactory.createLineBorder(new Color(1,50,32)));
@@ -237,7 +288,25 @@ public class BakersgameGUI {
                     labelCas.addMouseListener(new MouseListener() {
                         @Override
                         public void mouseClicked(MouseEvent e) {
-                            System.out.println("SEXOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
+                            JLabel labelPresionado = (JLabel) e.getSource();
+                            origenDestino.add(identificarCarta((ImageIcon) labelPresionado.getIcon()));
+                            if (origenDestino.size() == 2) {
+
+                                int indiceDestino = -1;
+                                for (int i = 0; i < posicionesFundaciones.size(); ++i) {
+                                    ArrayList<JLabel> labels = posicionesCascadas.get(i);
+                                    for (int j = 0; j < labels.size(); ++j) {
+                                        if (labelPresionado.equals(labels.get(j))) {
+                                            indiceDestino = i;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                moverCarta(origenDestino.getFirst(), origenDestino.get(1),indiceDestino,"tableau");
+                                origenDestino.clear();
+                            }
+
                         }
 
                         @Override
@@ -295,27 +364,198 @@ public class BakersgameGUI {
         frame.setVisible(true);
     }
 
-    public void setAtributosLogicos()
+    public void actualizarTablero()
     {
-        for (int i = 0; i < posicionesCascadas.size(); ++i) {
-            ArrayList<JLabel> cascada = posicionesCascadas.get(i);
+        bakersgame.getTablero().actualizarAses();
+        // Ciclo para poder meter las cartas actuales de tal cascada a la cascada GUI
+        for (int i = 0; i < 8; ++i) {
+            ArrayList<Carta> cascadaArray = transformarCascadaArray(i);
+            for (int j = 0; j < posicionesCascadas.get(i).size(); ++j) {
 
-            for (int j = 0; j < cascada.size(); ++j) {
-                cascada.get(j).setIcon(barajaGUI.getBarajaGUI().get(j).getCartaImagen().getIcon());
+                if (cascadaArray.size() < posicionesCascadas.get(i).size() && j >= cascadaArray.size()-1) {
+                    JLabel labelCas = posicionesCascadas.get(i).get(j);
+                    labelCas.setIcon(null);
+                    labelCas.setBackground(colorPoker);
+                } else {
+                    JLabel labelCas = posicionesCascadas.get(i).get(j);
+                    labelCas.setIcon(cascadaArray.get(j).getImagen());
+                    labelCas.setOpaque(true);
+                }
             }
+            transformarCascadaLista(cascadaArray, i);
         }
         panelTableau.repaint();
         panelTableau.revalidate();
+
+        // Ciclo para poder meter las cartas actuales del free cell logico a grafico
+        for (int i = 0;i < posicionesFreeCell.size(); ++i) {
+            if (bakersgame.getTablero().getFreeCells().get(i).getValor() == -1) {
+                JLabel labelFC = posicionesFreeCell.get(i);
+                if (labelFC.getIcon() != null) {
+                    labelFC.setIcon(null);
+                    labelFC.setBackground(colorPoker);
+                }
+            } else {
+                JLabel labelFC = posicionesFreeCell.get(i);
+                Carta carta = bakersgame.getTablero().getFreeCells().get(i);
+
+                if (labelFC.getIcon() == null || !labelFC.getIcon().equals(carta.getImagen())) {
+                    labelFC.setIcon(carta.getImagen());
+                    labelFC.setOpaque(true);
+                }
+            }
+        }
+        panelSuperior.repaint();
+        panelSuperior.revalidate();
+
+        // Ciclo para poder meter las cartas actuales de las fundaciones logico a grafico
+        for (int i = 0;i < posicionesFundaciones.size(); ++i) {
+            ArrayList<Carta> pilaArray = transformarPilaArray(i);
+
+            if (pilaArray.isEmpty()) {
+                for (int j = 0; j < posicionesFundaciones.get(i).size(); ++j) {
+                    JLabel labelFD = posicionesFundaciones.get(i).get(j);
+                    labelFD.setIcon(null);
+                    labelFD.setBackground(colorPoker);
+                }
+            } else if (pilaArray.size() < posicionesFundaciones.get(i).size()) {
+                for (int j = 0; j < posicionesFundaciones.get(i).size(); ++j) {
+                    if (pilaArray.size() < posicionesFundaciones.get(i).size() && j > pilaArray.size()-1) {
+                        JLabel labelFD = posicionesFundaciones.get(i).get(j);
+                        labelFD.setIcon(null);
+                        labelFD.setVisible(false);
+                    } else {
+                        JLabel labelFD = posicionesFundaciones.get(i).get(j);
+                        labelFD.setIcon(pilaArray.get(j).getImagen());
+                        labelFD.setOpaque(true);
+                        labelFD.setVisible(true);
+                    }
+                }
+            }
+
+        }
+        panelSuperior.repaint();
+        panelSuperior.revalidate();
     }
 
-    private boolean origenDestino()
+    /**
+     * Metodo para localizar una carta a partir de la imagen
+     * @param imagen
+     * @return
+     */
+    private Carta identificarCarta(ImageIcon imagen) {
+
+        // Localizar en tableau
+        Carta carta = null;
+        for (int i = 0; i < 8; i++) {
+            ArrayList<Carta> cascadaArray = transformarCascadaArray(i);
+            int tamanyo = cascadaArray.size();
+            for (int j = 0; j < tamanyo; ++j) {
+                if (cascadaArray.get(j).getImagen().equals(imagen)) {
+                    carta = cascadaArray.get(j);
+                }
+            }
+            transformarCascadaLista(cascadaArray, i);
+        }
+
+        // Localizar en free cells
+        for (int i = 0; i < bakersgame.getTablero().getFreeCells().size(); ++i) {
+            Carta cartaF = bakersgame.getTablero().getFreeCells().get(i);
+
+            if (cartaF.getImagen().equals(imagen)) {
+                carta = cartaF;
+            }
+        }
+
+        // Localizar en fundaciones
+        for (int i = 0; i < bakersgame.getTablero().getFundaciones().size(); ++i) {
+            ArrayList<Carta> pilaArray = transformarPilaArray(i);
+            for (int j = 0; j < pilaArray.size(); ++j) {
+                if (pilaArray.get(j).getImagen().equals(imagen)) {
+                    carta = pilaArray.get(j);
+                }
+            }
+            transformarPilaArrayPila(pilaArray, i);
+        }
+        return carta;
+    }
+
+    /**
+     * Metodo que mueve la carta origen a destino utilizando metodos del juego logico
+     * @param origen
+     * @param destino
+     * @return
+     */
+    private boolean moverCarta(Carta origen, Carta destino, int indiceDestino, String destinoString)
     {
+        //Si es null quiere decir que no hay elementos en la parte de donde se encuentra destino
+        System.out.println("Origen: " + origen + " Destino: " + destino + " Indice: " + indiceDestino + " DestinoString: " + destinoString);
+        if (destino == null) {
+            if (bakersgame.localizarCarta(origen).equals("tableau")) {
+                if (destinoString.equals("tableau")) {
+                    bakersgame.moverCartaEnTableau(origen, indiceDestino);
+                } else if (destinoString.equals("freecell")) {
+                    bakersgame.freCellYTableau(origen, "tableau", indiceDestino);
+                } else if (destinoString.equals("fundacion")) {
+
+                    bakersgame.moverCartaAFundacion(origen, indiceDestino);
+                }
+            } else if (bakersgame.localizarCarta(origen).equals("freecell")) {
+                if (destinoString.equals("tableau")) {
+
+                    bakersgame.freCellYTableau(origen, "freecell", indiceDestino);
+                } else if (destinoString.equals("fundacion")) {
+
+
+                    bakersgame.moverCartaAFundacion(origen, indiceDestino);
+                }
+            }
+        } else {
+            if (bakersgame.localizarCarta(origen).equals("tableau")) {
+                if (bakersgame.localizarCarta(destino).equals("tableau")) {
+                    bakersgame.moverCartaEnTableau(origen, bakersgame.getTablero().localizarCartaTableau(destino));
+                } else if (bakersgame.localizarCarta(destino).equals("freecell")) {
+                    bakersgame.freCellYTableau(origen, "tableau", bakersgame.getTablero().getFreeCells().indexOf(destino));
+                } else if (bakersgame.localizarCarta(destino).equals("fundacion")) {
+
+                    // Se verifica en que pila se encuentra la carta
+                    Pila<Carta> pilaTemp = null;
+                    for (int i = 0; i < bakersgame.getTablero().getFundaciones().size(); ++i) {
+                        pilaTemp = bakersgame.getTablero().getFundaciones().get(i);
+                        if (pilaTemp.peek().equals(destino)) {
+                            break;
+                        }
+                    }
+                    bakersgame.moverCartaAFundacion(origen, bakersgame.getTablero().getFundaciones().indexOf(pilaTemp));
+                }
+            } else if (bakersgame.localizarCarta(origen).equals("freecell")) {
+                if (bakersgame.localizarCarta(destino).equals("tableau")) {
+                    bakersgame.freCellYTableau(origen, "freecell", bakersgame.getTablero().getFreeCells().indexOf(destino));
+                } else if (bakersgame.localizarCarta(destino).equals("fundacion")) {
+                    // Se verifica en que pila se encuentra la carta
+                    Pila<Carta> pilaTemp = null;
+                    for (int i = 0; i < bakersgame.getTablero().getFundaciones().size(); ++i) {
+                        pilaTemp = bakersgame.getTablero().getFundaciones().get(i);
+                        if (pilaTemp.peek().equals(destino)) {
+                            break;
+                        }
+                    }
+                    bakersgame.moverCartaAFundacion(origen, bakersgame.getTablero().getFundaciones().indexOf(pilaTemp));
+                }
+            }
+        }
+
+
+        actualizarTablero();
+        bakersgame.getTablero().mostrarTablero();
         return true;
     }
 
     public void iniciarJuego()
     {
-        setAtributosLogicos();
+        bakersgame.getTablero().mostrarTablero();
+        actualizarTablero();
+
     }
 
     private void botonHint()
@@ -331,5 +571,53 @@ public class BakersgameGUI {
     private void botonReiniciar()
     {
 
+    }
+
+    /**
+     * Metodo para transformar una pila(fundacion) a un array(para pasarlo a GUI) sin modificar el orden y posiciones de esta
+     * @param indice
+     * @return
+     */
+    private ArrayList<Carta> transformarPilaArray(int indice) {
+        ArrayList<Carta> pilaFundacionArray = new ArrayList<>(13);
+
+        while (!bakersgame.getTablero().getFundaciones().get(indice).pilaVacia()) {
+            pilaFundacionArray.add(bakersgame.getTablero().getFundaciones().get(indice).pop());
+        }
+        Collections.reverse(pilaFundacionArray);
+
+        return pilaFundacionArray;
+    }
+
+    /**
+     * Metodo que restaura una fundacion
+     * @param pilaArray
+     * @param indice
+     */
+    public void transformarPilaArrayPila(ArrayList<Carta> pilaArray, int indice) {
+        for (int i = 0; i < pilaArray.size(); ++i) {
+            bakersgame.getTablero().getFundaciones().get(indice).push(pilaArray.removeLast());
+        }
+    }
+
+    public ArrayList<Carta> transformarCascadaArray(int indice) {
+        ArrayList<Carta> cascadaCarta = new ArrayList<>();
+        while (!bakersgame.getTablero().getTableau().get(indice).listaVacia()) {
+            cascadaCarta.add(bakersgame.getTablero().getTableau().get(indice).eliminarFin());
+        }
+        return cascadaCarta;
+    }
+
+    public void transformarCascadaLista(ArrayList<Carta> cascadaCarta, int indice) {
+        // Restauramos de forma inversa si insertarInicio mete al principio
+        while (!cascadaCarta.isEmpty()) {
+            Carta carta = cascadaCarta.removeFirst();
+            bakersgame.getTablero().getTableau().get(indice).insertarInicio(carta);
+        }
+    }
+
+    public ArrayList<Carta> transformarFundaciones()
+    {
+        return null;
     }
 }

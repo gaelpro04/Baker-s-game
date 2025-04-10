@@ -17,6 +17,7 @@ public class Carta {
     {
         this.valor = valor;
         this.palo = palo;
+        imagen = new ImageIcon();
     }
 
     public Carta(Carta carta)
@@ -66,6 +67,6 @@ public class Carta {
     public void setImagen(ImageIcon imagen, int x, int y)
     {
         Image imagen1 = imagen.getImage().getScaledInstance(x,y, Image.SCALE_SMOOTH);
-        imagen.setImage(imagen1);
+        this.imagen.setImage(imagen1);
     }
 }

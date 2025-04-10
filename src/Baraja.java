@@ -1,4 +1,5 @@
 import javax.swing.*;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -8,7 +9,6 @@ public class Baraja {
     //Atributos esenciales, uno para la baraja donde se almacenarán las cartas y otra es un banco para asignar
     //los palos
     private ListaDobleCircular<Carta> baraja;
-    private String[] palos = {"Diamante", "Corazon", "Trebol", "Pico"};
 
     /**
      * Constructor preterminado, donde genera las cartas
@@ -20,10 +20,10 @@ public class Baraja {
         String[] palos = {"diamonds", "hearts", "clubs", "spades"};
         for (int i = 0; i < 4; ++i) {
             String palo = palos[i];
-            for (int j = 0; j < 13; ++j) {
-                Carta carta = new Carta((j+1), palos[i]);
+            for (int j = 1; j <= 13; ++j) {
+                Carta carta = new Carta(j, palos[i]);
                 carta.setImagen(new ImageIcon(crearURL(j,palo)), 100, 140);
-                baraja.insertarFin(new Carta((j+1), palos[i]));
+                baraja.insertarFin(carta);
             }
         }
     }
@@ -98,12 +98,12 @@ public class Baraja {
             //entonces quedaría 4 de 6 y 4 de 7
             if (i <= 3) {
                 //Ciclo que mete las seis cartas que representan una cascada
-                for (int j = 0; j < 6; ++j) {
+                for (int j = 0; j < 7; ++j) {
                     cascada.insertarFin(baraja.eliminarInicio());
                 }
             } else {
                 //Ciclo que mete 7 cartas que representan una cascada
-                for (int j = 0; j < 7; ++j) {
+                for (int j = 0; j < 6; ++j) {
                     cascada.insertarFin(baraja.eliminarInicio());
                 }
             }
@@ -127,6 +127,24 @@ public class Baraja {
 
     private String crearURL(int i, String palo)
     {
-        return "C:\\Users\\Usuario\\IdeaProjects\\Baker-s-game\\PNG-cards-1.3\\"+ i +"_of_"+ palo +".png";
+        return "C:\\Users\\sgsg_\\IdeaProjects\\Baker-s-game\\PNG-cards-1.3\\" + i + "_of_"+ palo + ".png";
+    }
+
+    public void probarBaraja()
+    {
+        JFrame frame = new JFrame("Prueba");
+        JPanel panel = new JPanel();
+        panel.setLayout(new FlowLayout());
+        frame.setLayout(new BorderLayout());
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+        for (int i = 0; i < 52; ++i) {
+            panel.add(new JLabel(baraja.eliminarInicio().getImagen()));
+        }
+
+        frame.add(panel, BorderLayout.CENTER);
+        frame.setSize(1000,1000);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
     }
 }

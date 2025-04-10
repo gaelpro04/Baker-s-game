@@ -309,7 +309,6 @@ public class Bakersgame {
 
     public boolean freCellYTableau(Carta carta, String origen, int indexDestino)
     {
-        --indexDestino;
 
         if (origen.equals("tableau")) {
             ListaSimple<Carta> cascada = tablero.getTableau().get(tablero.localizarCartaTableau(carta));
@@ -334,6 +333,7 @@ public class Bakersgame {
                         undoNumeroLugar.push(i);
                         undoLugar.push("freecell");
                         cascada.insertarFin(tablero.getFreeCells().remove(i));
+                        tablero.getFreeCells().add(i, new Carta(carta));
                         return true;
                     } else {
                         System.out.println("No se puede mover al tableau");
@@ -346,53 +346,54 @@ public class Bakersgame {
 
     public boolean moverCartaAFundacion(Carta carta, int indiceFundacion)
     {
-        --indiceFundacion;
-        Pila<Carta> fundacion = tablero.getFundaciones().get(indiceFundacion);
+        if (indiceFundacion < tablero.getFundaciones().size() && indiceFundacion >= 0) {
+            Pila<Carta> fundacion = tablero.getFundaciones().get(indiceFundacion);
 
-        if (localizarCarta(carta).equals("freecell")) {
-            if (fundacion.pilaVacia() && carta.getValor() == 1) {
-                for (int i = 0; i < tablero.getFreeCells().size(); ++i) {
-                    if (tablero.getFreeCells().get(i).equals(carta)) {
-                        undo.push(tablero.getFreeCells().get(i));
-                        undoNumeroLugar.push(i);
-                        undoLugar.push("freecell");
-                        fundacion.push(tablero.getFreeCells().remove(i));
-                        return true;
+            if (localizarCarta(carta).equals("freecell")) {
+                if (fundacion.pilaVacia() && carta.getValor() == 1) {
+                    for (int i = 0; i < tablero.getFreeCells().size(); ++i) {
+                        if (tablero.getFreeCells().get(i).equals(carta)) {
+                            undo.push(tablero.getFreeCells().get(i));
+                            undoNumeroLugar.push(i);
+                            undoLugar.push("freecell");
+                            fundacion.push(tablero.getFreeCells().remove(i));
+                            return true;
+                        }
+                    }
+                } else if (!fundacion.pilaVacia() && esSecuencialCon(carta, fundacion.peek())) {
+                    //Localizar la carta que saco el usuario
+                    for (int i = 0; i < tablero.getFreeCells().size(); ++i) {
+                        if (tablero.getFreeCells().get(i).equals(carta)) {
+                            undo.push(tablero.getFreeCells().get(i));
+                            undoNumeroLugar.push(i);
+                            undoLugar.push("freecell");
+                            fundacion.push(tablero.getFreeCells().remove(i));
+                            return true;
+                        }
                     }
                 }
-            } else if (!fundacion.pilaVacia() && esSecuencialCon(carta, fundacion.peek())) {
-                //Localizar la carta que saco el usuario
-                for (int i = 0; i < tablero.getFreeCells().size(); ++i) {
-                    if (tablero.getFreeCells().get(i).equals(carta)) {
-                        undo.push(tablero.getFreeCells().get(i));
-                        undoNumeroLugar.push(i);
-                        undoLugar.push("freecell");
-                        fundacion.push(tablero.getFreeCells().remove(i));
-                        return true;
-                    }
+            } else if (localizarCarta(carta).equals("tableau")) {
+                ListaSimple<Carta> cascada = tablero.getTableau().get(tablero.localizarCartaTableau(carta));
+                if (fundacion.pilaVacia() && carta.getValor() == 1 && cascada.visualizarFin().equals(carta)) {
+                    undo.push(cascada.visualizarFin());
+                    undoNumeroLugar.push(tablero.localizarCartaTableau(carta));
+                    undoLugar.push("tableau");
+                    fundacion.push(cascada.eliminarFin());
+                    return true;
+                } else if (!fundacion.pilaVacia() && esSecuencialCon(carta, fundacion.peek()) && cascada.visualizarFin().equals(carta)) {
+                    undo.push(cascada.visualizarFin());
+                    undoNumeroLugar.push(tablero.localizarCartaTableau(carta));
+                    undoLugar.push("tableau");
+                    fundacion.push(cascada.eliminarFin());
+                    return true;
+                } else {
+                    System.out.println("Carta invalida");
                 }
-            }
-        } else if (localizarCarta(carta).equals("tableau")) {
-            ListaSimple<Carta> cascada = tablero.getTableau().get(tablero.localizarCartaTableau(carta));
-            if (fundacion.pilaVacia() && carta.getValor() == 1 && cascada.visualizarFin().equals(carta)) {
-                undo.push(cascada.visualizarFin());
-                undoNumeroLugar.push(tablero.localizarCartaTableau(carta));
-                undoLugar.push("tableau");
-                fundacion.push(cascada.eliminarFin());
-                return true;
-            } else if (!fundacion.pilaVacia() && esSecuencialCon(carta, fundacion.peek()) && cascada.visualizarFin().equals(carta)) {
-                undo.push(cascada.visualizarFin());
-                undoNumeroLugar.push(tablero.localizarCartaTableau(carta));
-                undoLugar.push("tableau");
-                fundacion.push(cascada.eliminarFin());
-                return true;
             } else {
-                System.out.println("Carta invalida");
+                System.out.println("La carta no esta en un origen valido");
             }
-        } else {
-            System.out.println("La carta no esta en un origen valido");
-        }
 
+        }
         return false;
     }
 
@@ -404,7 +405,6 @@ public class Bakersgame {
      */
     public boolean moverCartaEnTableau(Carta carta, int cascadaIndex)
     {
-        --cascadaIndex;
         //Se crea una instancia donde se almacenarán las cartas que se quieren mover(puede ser desde una carta hasta más)
         ListaSimple<Carta> cascadaMovimiento = new ListaSimple<>();
         ListaSimple<Carta> destino = tablero.getTableau().get(cascadaIndex);
