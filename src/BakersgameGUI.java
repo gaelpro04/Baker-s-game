@@ -383,6 +383,7 @@ public class BakersgameGUI {
                     JLabel labelFD = posicionesFundaciones.get(i).get(j);
                     labelFD.setIcon(null);
                     labelFD.setBackground(colorPoker);
+                    panelFundaciones.setComponentZOrder(labelFD,0);
                 }
             } else if (pilaArray.size() < posicionesFundaciones.get(i).size()) {
                 for (int j = 0; j < posicionesFundaciones.get(i).size(); ++j) {
@@ -390,6 +391,7 @@ public class BakersgameGUI {
                         JLabel labelFD = posicionesFundaciones.get(i).get(j);
                         labelFD.setIcon(null);
                         labelFD.setVisible(false);
+                        panelFundaciones.setComponentZOrder(labelFD,0);
                     } else {
                         JLabel labelFD = posicionesFundaciones.get(i).get(j);
                         labelFD.setIcon(pilaArray.get(j).getImagen());
@@ -400,6 +402,8 @@ public class BakersgameGUI {
             }
 
         }
+        panelFundaciones.repaint();
+        panelFundaciones.revalidate();
         panelSuperior.repaint();
         panelSuperior.revalidate();
     }
