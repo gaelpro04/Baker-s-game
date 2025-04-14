@@ -97,8 +97,8 @@ public class Tablero {
             //Se toma el ultimo elemento de la cascada actual sin eliminarla y se compara si es uno para mandarlo a la
             //fundación disponible
             Carta elementoComparado = cascada.visualizarFin();
-            if (elementoComparado.getValor() == 1) {
-
+            if (elementoComparado != null && elementoComparado.getValor() == 1) {
+                --i;
                 //Ciclo para ingresar la carta
                 for (int j = 0; j < 4; ++j) {
                     Pila<Carta> fundacion = fundaciones.get(j);
