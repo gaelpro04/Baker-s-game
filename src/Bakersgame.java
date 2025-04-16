@@ -1,6 +1,4 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Bakersgame {
 
@@ -9,6 +7,7 @@ public class Bakersgame {
     private Pila<Carta> undo;
     private Pila<Integer> undoNumeroLugar;
     private Pila<String> undoLugar;
+
 
 
     public Bakersgame(Baraja baraja)
@@ -150,17 +149,26 @@ public class Bakersgame {
      */
     public boolean undo()
     {
+        boolean postBooelan = false;
         if (!undo.pilaVacia()) {
             if (localizarCarta(undo.peek()).equals("tableau")) {
-                if (undoLugar.peek().equals("tableau")) {
-                    tablero.getTableau().get(tablero.localizarCartaTableau(undo.peek())).eliminarFin();
+                int indiceTemp = undoNumeroLugar.peek();
+                while (!undoLugar.pilaVacia() && undoLugar.peek().equals("tableau") && indiceTemp == undoNumeroLugar.peek()) {
+                    System.out.println("UNDO ACTUAL: " + undo.peek() + " INDICE DONDE PERTENECE: " + undoNumeroLugar.peek() + " LUGAR: " + undoLugar.peek());
+                    if (tablero.localizarCartaTableau(undo.peek()) == -1) {
+                        System.out.println("ERROR: Carta no encontrada en ninguna cascada: " + undo.peek());
+                        break; // o break, dependiendo del contexto
+                    }
+                    tablero.getTableau().get(tablero.localizarCartaTableau(undo.peek())).eliminarX(undo.peek());
                     tablero.getTableau().get(undoNumeroLugar.pop()).insertarFin(undo.pop());
                     undoLugar.pop();
+                    postBooelan = true;
+                } if (postBooelan) {
                     return true;
                 } else if (undoLugar.peek().equals("freecell")) {
                     tablero.getTableau().get(tablero.localizarCartaTableau(undo.peek())).eliminarFin();
                     if (tablero.getFreeCells().get(undoNumeroLugar.peek()) == null || tablero.getFreeCells().get(undoNumeroLugar.peek()).getValor() == -1) {
-                        tablero.getFreeCells().add(undoNumeroLugar.pop(), undo.pop());
+                        tablero.getFreeCells().set(undoNumeroLugar.pop(), undo.pop());
                         undoLugar.pop();
                         return true;
                     }
@@ -168,7 +176,7 @@ public class Bakersgame {
             } else if (localizarCarta(undo.peek()).equals("freecell")) {
                 for (int i = 0; i < tablero.getFreeCells().size(); i++) {
                     if (undo.peek().equals(tablero.getFreeCells().get(i))) {
-                        tablero.getFreeCells().remove(i);
+                        tablero.getFreeCells().set(i, new Carta());
                         break;
                     }
                 }
@@ -180,8 +188,10 @@ public class Bakersgame {
 
             } else if (localizarCarta(undo.peek()).equals("fundacion")) {
                 for (int i = 0; i < tablero.getFundaciones().size(); i++) {
-                    if (tablero.getFundaciones().get(i).peek().equals(undo.peek())) {
-                        tablero.getFundaciones().get(i).pop();
+                    Pila<Carta> fundacion = tablero.getFundaciones().get(i);
+                    if (!fundacion.pilaVacia() && fundacion.peek().equals(undo.peek())) {
+                        System.out.println("Deshaciendo carta: " + undo.peek());
+                        fundacion.pop();
                         break;
                     }
                 }
@@ -191,7 +201,7 @@ public class Bakersgame {
                     undoLugar.pop();
                     return true;
                 } else if (undoLugar.peek().equals("freecell")) {
-                    tablero.getFreeCells().add(undoNumeroLugar.pop(), undo.pop());
+                    tablero.getFreeCells().set(undoNumeroLugar.pop(), undo.pop());
                     undoLugar.pop();
                     return true;
                 }
@@ -216,6 +226,8 @@ public class Bakersgame {
         for (int i = 0; i < tablero.getTableau().size(); i++) {
             if (!tablero.getTableau().get(i).listaVacia()) {
                 ultimasCartas.add(tablero.getTableau().get(i).visualizarFin());
+            } else {
+                ultimasCartas.add(new Carta());
             }
         }
 
@@ -251,21 +263,81 @@ public class Bakersgame {
         for (int i = 0; i < tablero.getFreeCells().size(); i++) {
             if (tablero.getFreeCells().get(i).getValor() >= 1) {
                 for (int j = 0; j < tablero.getTableau().size(); j++) {
-                    if (tablero.getTableau().get(j).visualizarFin().getValor() >= 1) {
-                        if (esSecuencialCon(tablero.getTableau().get(j).visualizarFin(), tablero.getFreeCells().get(i))) {
-                            hint.insertarFin(tablero.getFreeCells().get(i));
-                            hint.insertarFin(tablero.getTableau().get(j).visualizarFin());
-                            return hint;
+                    if (!tablero.getTableau().get(j).listaVacia()) {
+                        if (tablero.getTableau().get(j).visualizarFin().getValor() >= 1) {
+                            if (esSecuencialCon(tablero.getTableau().get(j).visualizarFin(), tablero.getFreeCells().get(i))) {
+                                hint.insertarFin(tablero.getFreeCells().get(i));
+                                hint.insertarFin(tablero.getTableau().get(j).visualizarFin());
+                                return hint;
+                            }
                         }
+                    } else if (tablero.getFreeCells().get(i).getValor() == 13) {
+                        hint.insertarFin(tablero.getFreeCells().get(i));
+                        hint.insertarFin(new Carta());
                     }
                 }
             }
         }
 
+        //Ciclo que verifica si una cascada es compatible con alguna otra cascada del mismo tableau
+        ListaSimple<Carta> cascadaMovimiento = new ListaSimple<>();
+        for (int i = 0; i < tablero.getTableau().size(); ++i) {
+            ListaSimple<Carta> cascada = tablero.getTableau().get(i);
+
+            if (cascada.buscar(ultimasCartas.get(i))) {
+
+                Carta actual = cascada.eliminarFin();
+                cascadaMovimiento.insertarInicio(actual);
+
+                if (cascada.visualizarFin() != null) {
+                    while (esSecuencialCon(cascada.visualizarFin(), actual)) {
+
+                        actual = cascada.eliminarFin();
+                        cascadaMovimiento.insertarInicio(actual);
+                        if (cascada.visualizarFin() == null) {
+                            break;
+                        }
+                    }
+                }
+
+                if (cascadaMovimiento.tamanio() <= calcularCascadaMovible()) {
+                    hint.insertarInicio(cascadaMovimiento.visualizarInicio());
+
+                    for (int j = 0; j < tablero.getTableau().size(); ++j) {
+                        if (i == j || tablero.getTableau().get(j).listaVacia()) {
+                            continue;
+                        } else if (!tablero.getTableau().get(j).listaVacia() && esSecuencialCon(tablero.getTableau().get(j).visualizarFin(), hint.visualizarInicio())) {
+                            System.out.println(tablero.getTableau().get(j).visualizarFin() + "///" + hint.visualizarInicio());
+                            hint.insertarFin(tablero.getTableau().get(j).visualizarFin());
+                            regresarCartas(cascadaMovimiento, cascada);
+                            System.out.println("Entro en cascada");
+                            return hint;
+                        }
+                    }
+                }
+                while (!hint.listaVacia()) {
+                    hint.eliminarInicio();
+                }
+                regresarCartas(cascadaMovimiento, cascada);
+
+            }
+        }
+        while (!hint.listaVacia()) {
+            hint.eliminarInicio();
+        }
+
         //Ciclo que verifica si alguna carta de las ultimas de cada cascada es compatible con alguna del mismo tableau
         for (int i = 0; i < ultimasCartas.size(); i++) {
-            for (int j = i+1; j < tablero.getTableau().size(); j++) {
-                if (!tablero.getTableau().get(j).listaVacia() && esSecuencialCon(tablero.getTableau().get(j).visualizarFin(), ultimasCartas.get(i))) {
+            for (int j = 0; j < tablero.getTableau().size(); j++) {
+                if (i == j || tablero.getTableau().get(j).listaVacia()) {
+                    if (tablero.getTableau().get(j).listaVacia()) {
+                        if (ultimasCartas.get(i).getValor() == 13) {
+                            hint.insertarFin(ultimasCartas.get(i));
+                            hint.insertarFin(new Carta());
+                            return hint;
+                        }
+                    }
+                } else if (!tablero.getTableau().get(j).listaVacia() && esSecuencialCon(tablero.getTableau().get(j).visualizarFin(), ultimasCartas.get(i))) {
                     hint.insertarFin(ultimasCartas.get(i));
                     hint.insertarFin(tablero.getTableau().get(j).visualizarFin());
                     return hint;
@@ -299,10 +371,12 @@ public class Bakersgame {
         //Este ciclo solamente se accede si se usa undo
         for (int i = 0; i < 4; ++i) {
             Pila<Carta> fundacion = tablero.getFundaciones().get(i);
-
-            if (fundacion.peek().equals(carta)) {
-                return "fundacion";
+            if (!fundacion.pilaVacia()) {
+                if (fundacion.peek().equals(carta)) {
+                    return "fundacion";
+                }
             }
+
         }
 
         return "null";
@@ -430,7 +504,6 @@ public class Bakersgame {
 
             //Si la cascada actual se encuentra la carta que se quiere mover se procede a sacarla
             if (cascada.buscar(carta)) {
-                System.out.println("Si se encontro");
 
                 //Se obtiene la primer carta de donde se quiere eliminar.
                 Carta actual = cascada.eliminarFin();
@@ -438,6 +511,7 @@ public class Bakersgame {
                 undo.push(actual);
                 undoNumeroLugar.push(i);
                 undoLugar.push("tableau");
+                System.out.println("Metido a undo: " + actual + " Indice del lugar: " + i + " Lugar: " + "tableau");
 
                 //Mientras que la carta actual no sea igual a la que se identificó(en algún punto llegará)
                 while (!actual.equals(carta)) {
@@ -452,6 +526,8 @@ public class Bakersgame {
                         undo.push(actual);
                         undoNumeroLugar.push(i);
                         undoLugar.push("tableau");
+                        System.out.println("Metido a undo: " + actual + " Indice del lugar: " + i + " Lugar: " + "tableau");
+
                     } else {
                         break;
                     }
@@ -461,15 +537,13 @@ public class Bakersgame {
                 // usuario. Primero se verifica si el tamaño de las cartas obtenidas corresponde al calculo de cuantas
                 //cartas de pueden mover(ya sea igual o menor)
                 if (cascadaMovimiento.tamanio() <= calcularCascadaMovible()) {
-                    System.out.println("entro a formula");
 
                     //Ahora se analiza los posibles casos.
 
                     //Si la cascada donde se quiere meter la o las carta/s está vacía y la carta que se identificó
                     //es igual a rey entonces si es valido y se procede a meterlas ahí
-                    if (puedeInsertarse(destino, carta)) {
+                    if (puedeInsertarse(destino, carta, cascadaMovimiento)) {
                         moverCartas(cascadaMovimiento, destino);
-                        System.out.println("entro");
                         return true;
 
                         //En dado caso que no se cumpla simplemente es invaldia y la lista de las cartas sacadas se vuelven a
@@ -485,20 +559,18 @@ public class Bakersgame {
                     regresarCartas(cascadaMovimiento, cascada);
                     return false;
                 }
-            } else {
-                System.out.println("No se encuentra");
             }
         }
 
         return false;
     }
 
-    private boolean puedeInsertarse(ListaSimple<Carta> destino, Carta carta)
+    private boolean puedeInsertarse(ListaSimple<Carta> destino, Carta carta, ListaSimple<Carta> cascadaMovimiento)
     {
-        if (destino.listaVacia() && carta.getValor() == 13) {
+        if (destino.listaVacia() && carta.getValor() == 13 && cascadaMovimiento.buscar(carta)) {
             return true;
         } else if (!destino.listaVacia()) {
-            if ((destino.visualizarFin().getValor()-1) == carta.getValor() && destino.visualizarFin().getPalo().equals(carta.getPalo())) {
+            if ((destino.visualizarFin().getValor()-1) == carta.getValor() && destino.visualizarFin().getPalo().equals(carta.getPalo()) && cascadaMovimiento.buscar(carta)) {
                 return true;
             }
         }
@@ -561,9 +633,32 @@ public class Bakersgame {
                 superior.getPalo().equals(inferior.getPalo());
     }
 
-    public void actualizarAses()
+    /**
+     * Metodo para actualizar los Ases dentro de la clase Bakers
+     * @return
+     */
+    public boolean actualizarAses()
     {
-        tablero.actualizarAses();
+        //Como el metodo de actualizar Ases no esta conectado con el undo de la clase, es necesario poder comunicarlo
+        //por esto mismo es que se retorna la carta y el indice origen
+        HashMap<Carta, Integer> asMovido = tablero.actualizarAses();
+        if (!asMovido.isEmpty()) {
+
+            for (Map.Entry<Carta, Integer> entry : asMovido.entrySet()) {
+                Carta carta = entry.getKey(); // Obtener la clave (Carta)
+                Integer indice = entry.getValue(); // Obtener el valor (Integer)
+
+                undo.push(carta);
+                undoNumeroLugar.push(indice);
+                undoLugar.push("tableau");
+
+                // Imprimir o procesar los valores
+                System.out.println("Carta: " + carta + ", Índice: " + indice);
+            }
+
+            return true;
+        }
+        return false;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

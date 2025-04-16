@@ -86,6 +86,18 @@ public class ListaSimple<T> {
         return dato;
     }
 
+    public T visualizarInicio()
+    {
+        T objeto = null;
+        if (inicio == null) {
+            System.out.println("Lista vacia");
+        } else {
+            objeto = inicio.getInfo();
+        }
+
+        return objeto;
+    }
+
     public String mostrar()
     {
         Nodo<T> r = inicio;

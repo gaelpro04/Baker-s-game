@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class Tablero {
@@ -21,7 +22,7 @@ public class Tablero {
         }
         fundaciones = new ArrayList<>(4);
         for (int i = 0;i < 4; ++i) {
-            fundaciones.add(new Pila<>());
+            fundaciones.add(new Pila<>(13));
         }
 
         //Ingreso de las cascadas
@@ -88,9 +89,10 @@ public class Tablero {
      * Método que detecte automaticamente si hay un As en el ultimo elemento de la cascada para meterlo a alguna fundacion
      * disponible
      */
-    public void actualizarAses()
+    public HashMap<Carta, Integer> actualizarAses()
     {
         //Ciclo para verificar cada cascada
+        HashMap<Carta, Integer> asMovido = new HashMap<>();
         for (int i = 0; i < 8; ++i) {
             ListaSimple<Carta> cascada = tableau.get(i);
 
@@ -98,7 +100,6 @@ public class Tablero {
             //fundación disponible
             Carta elementoComparado = cascada.visualizarFin();
             if (elementoComparado != null && elementoComparado.getValor() == 1) {
-                --i;
                 //Ciclo para ingresar la carta
                 for (int j = 0; j < 4; ++j) {
                     Pila<Carta> fundacion = fundaciones.get(j);
@@ -107,11 +108,14 @@ public class Tablero {
                     if (fundacion.pilaVacia()) {
                         cascada.eliminarFin();
                         fundacion.push(elementoComparado);
+                        asMovido.put(elementoComparado, i);
                         break;
                     }
                 }
             }
         }
+
+        return asMovido;
     }
 
     public void mostrarTablero()

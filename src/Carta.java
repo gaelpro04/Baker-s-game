@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 
+//Clase que modela una carta junto a su imagen
 public class Carta {
     private int valor;
     private String palo;

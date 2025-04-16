@@ -71,7 +71,7 @@ public class Pila<T> {
 
         T objeto = null;
 
-        //Si la pila está vacia , no hay nada que sacar
+        //Si la pila está vacia, no hay nada que sacar
         if (pilaVacia()) {
             System.out.println("No se puede");
 
@@ -99,5 +99,20 @@ public class Pila<T> {
 
     public int tamano() {
         return tope + 1;
+    }
+
+    /**
+     * Metodo que convierte a String todos los elementos de la Pila
+     * @return
+     */
+    public String elementosComoString() {
+        if (pilaVacia()) return "Pila vacía";
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = tope; i >= 0; i--) {
+            sb.append(elemento[i].toString());
+            if (i != 0) sb.append(" -> ");
+        }
+        return sb.toString();
     }
 }
