@@ -15,7 +15,6 @@ public class Tablero {
     public Tablero(Baraja baraja)
     {
         this.baraja = baraja;
-        baraja.revolver();
         freeCells = new ArrayList<>(4);
         for (int i = 0; i < 4; ++i) {
             freeCells.add(new Carta());

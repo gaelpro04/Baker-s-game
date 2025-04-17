@@ -250,6 +250,13 @@ public class Bakersgame {
                         hint.insertarFin(tablero.getFundaciones().get(j).peek());
                         return hint;
                     }
+                    //Si esta vacia la fundacion y alguna carta es un A, entonces es jugada valida
+                } else {
+                    if (ultimasCartas.get(i).getValor() == 1) {
+                        hint.insertarFin(ultimasCartas.get(i));
+                        hint.insertarFin(new Carta());
+                        return hint;
+                    }
                 }
 
             }

@@ -11,6 +11,7 @@ public class BakersgameGUI {
     private Bakersgame bakersgame;
     private Baraja baraja;
     private ArrayList<Carta> origenDestino;
+    private boolean activadorOrden;
 
     //Atributos GUI
     private Color colorPoker;
@@ -24,8 +25,10 @@ public class BakersgameGUI {
 
     public BakersgameGUI()
     {
+        activadorOrden = false;
+
         colorPoker = new Color(53,94,59);
-        baraja = new Baraja();
+        baraja = new Baraja(activadorOrden);
         bakersgame = new Bakersgame(baraja);
         origenDestino = new ArrayList<>(2);
 
@@ -392,17 +395,17 @@ public class BakersgameGUI {
         frame.setFocusTraversalPolicy(null);
         frame.setFocusTraversalPolicyProvider(false);
 
+
         frame.add(panelControl, BorderLayout.SOUTH);
         frame.add(panelTableau, BorderLayout.CENTER);
         frame.add(panelSuperior, BorderLayout.NORTH);
-        frame.setSize(1000,800);
+        frame.setSize(1000,915);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
 
     public void actualizarTablero()
     {
-
         int mulX = 60;
         int mulY = 70;
 
@@ -575,6 +578,8 @@ public class BakersgameGUI {
         // Ciclo para poder meter las cartas actuales de las fundaciones logico a grafico
         for (int i = 0;i < posicionesFundaciones.size(); ++i) {
             ArrayList<Carta> pilaArray = transformarPilaArray(bakersgame.getTablero().getFundaciones().get(i));
+            System.out.println("ARRAY -> " + pilaArray.toString());
+            System.out.println("PILA -> " + bakersgame.getTablero().getFundaciones().get(i).elementosComoString());
 
             if (pilaArray.isEmpty()) {
                 for (int j = 0; j < posicionesFundaciones.get(i).size(); ++j) {
@@ -872,7 +877,7 @@ public class BakersgameGUI {
     private void botonReiniciar()
     {
         //Se inicializan de nuevo algunos atributos y se desactivan algunos botones
-        baraja = new Baraja();
+        baraja = new Baraja(activadorOrden);
         bakersgame = new Bakersgame(baraja);
         origenDestino = new ArrayList<>(2);
         actualizarTablero();
@@ -900,7 +905,7 @@ public class BakersgameGUI {
      */
     private ArrayList<Carta> transformarPilaArray(Pila<Carta> pilaOriginal) {
         ArrayList<Carta> copia = new ArrayList<>();
-        Pila<Carta> temporal = new Pila<>();
+        Pila<Carta> temporal = new Pila<>(13);
 
         //Se vacia en pila temporal y se guarda la en copia
         while (!pilaOriginal.pilaVacia()) {

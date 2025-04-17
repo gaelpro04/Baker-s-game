@@ -9,23 +9,36 @@ public class Baraja {
     //Atributos esenciales, uno para la baraja donde se almacenarán las cartas y otra es un banco para asignar
     //los palos
     private ListaDobleCircular<Carta> baraja;
+    private boolean ordenada;
 
     /**
      * Constructor preterminado, donde genera las cartas
      */
-    public Baraja()
+    public Baraja(boolean ordenada)
     {
-        //Inicialización de la baraja junto a su generación
+        this.ordenada = ordenada;
         baraja = new ListaDobleCircular<>();
         String[] palos = {"diamonds", "hearts", "clubs", "spades"};
-        for (int i = 0; i < 4; ++i) {
-            String palo = palos[i];
-            for (int j = 1; j <= 13; ++j) {
-                Carta carta = new Carta(j, palos[i]);
-                carta.setImagen(new ImageIcon(crearURL(j,palo)), 100, 140);
-                baraja.insertarFin(carta);
+        if (ordenada) {
+            for (int i = 0; i < 4; ++i) {
+                String palo = palos[i];
+                for (int j = 13; j > 0; --j) {
+                    Carta carta = new Carta(j, palo);
+                    carta.setImagen(new ImageIcon(crearURL(j,palo)), 100, 140);
+                    baraja.insertarFin(carta);
+                }
+            }
+        } else {
+            for (int i = 0; i < 4; ++i) {
+                String palo = palos[i];
+                for (int j = 1; j <= 13; ++j) {
+                    Carta carta = new Carta(j, palos[i]);
+                    carta.setImagen(new ImageIcon(crearURL(j,palo)), 100, 140);
+                    baraja.insertarFin(carta);
+                }
             }
         }
+
     }
 
     /**
@@ -84,6 +97,9 @@ public class Baraja {
      */
     public ArrayList<ListaSimple<Carta>> sacarCascadas()
     {
+        if (!ordenada) {
+            revolver();
+        }
         //Se crea el objeto el cual regresaremos con todas las cascadas generadas
         ArrayList<ListaSimple<Carta>> cascadas = new ArrayList<>(8);
 
