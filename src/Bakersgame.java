@@ -8,8 +8,10 @@ public class Bakersgame {
     private Pila<Integer> undoNumeroLugar;
     private Pila<String> undoLugar;
 
-
-
+    /**
+     * Constructor preterminado
+     * @param baraja
+     */
     public Bakersgame(Baraja baraja)
     {
         this.baraja = baraja;
@@ -19,6 +21,9 @@ public class Bakersgame {
         undoNumeroLugar = new Pila<>(100000);
     }
 
+    /**
+     * Metodo para jugar en consola
+     */
     public void iniciarJuego()
     {
         String opcion;
@@ -150,14 +155,16 @@ public class Bakersgame {
     public boolean undo()
     {
         boolean postBooelan = false;
+
+        //Se verifica si undo no esta vacio para proceder a meter la carta movida en dodne estaba
         if (!undo.pilaVacia()) {
+
+            //Primero se localiza donde se encuentra actualmente la carta movida
             if (localizarCarta(undo.peek()).equals("tableau")) {
                 int indiceTemp = undoNumeroLugar.peek();
                 while (!undoLugar.pilaVacia() && undoLugar.peek().equals("tableau") && indiceTemp == undoNumeroLugar.peek()) {
-                    System.out.println("UNDO ACTUAL: " + undo.peek() + " INDICE DONDE PERTENECE: " + undoNumeroLugar.peek() + " LUGAR: " + undoLugar.peek());
                     if (tablero.localizarCartaTableau(undo.peek()) == -1) {
-                        System.out.println("ERROR: Carta no encontrada en ninguna cascada: " + undo.peek());
-                        break; // o break, dependiendo del contexto
+                        break;
                     }
                     tablero.getTableau().get(tablero.localizarCartaTableau(undo.peek())).eliminarX(undo.peek());
                     tablero.getTableau().get(undoNumeroLugar.pop()).insertarFin(undo.pop());
@@ -173,6 +180,8 @@ public class Bakersgame {
                         return true;
                     }
                 }
+
+                //Si se encuentra en las free cells...
             } else if (localizarCarta(undo.peek()).equals("freecell")) {
                 for (int i = 0; i < tablero.getFreeCells().size(); i++) {
                     if (undo.peek().equals(tablero.getFreeCells().get(i))) {
@@ -186,11 +195,11 @@ public class Bakersgame {
                     return true;
                 }
 
+                //Si se encuentra en fundaciones....
             } else if (localizarCarta(undo.peek()).equals("fundacion")) {
                 for (int i = 0; i < tablero.getFundaciones().size(); i++) {
                     Pila<Carta> fundacion = tablero.getFundaciones().get(i);
                     if (!fundacion.pilaVacia() && fundacion.peek().equals(undo.peek())) {
-                        System.out.println("Deshaciendo carta: " + undo.peek());
                         fundacion.pop();
                         break;
                     }
@@ -349,9 +358,15 @@ public class Bakersgame {
         return hint;
     }
 
+    /**
+     * Metodo para localizar la zona donde se encuentra una carta
+     * @param carta
+     * @return
+     */
     public String localizarCarta(Carta carta)
     {
 
+        //Ciclo para verificar si se encuentra en tableau
         for (int i = 0; i < tablero.getTableau().size(); ++i) {
             ListaSimple<Carta> cascada = tablero.getTableau().get(i);
 
@@ -360,6 +375,7 @@ public class Bakersgame {
             }
         }
 
+        //Ciclo para verificar si se encuentra en free cells
         for (int i = 0; i < tablero.getFreeCells().size(); ++i) {
             Carta cartaFreeCell = tablero.getFreeCells().get(i);
 
@@ -368,7 +384,7 @@ public class Bakersgame {
             }
         }
 
-        //Este ciclo solamente se accede si se usa undo
+        //Ciclo para verificar si se encuentra en alguna fundacion
         for (int i = 0; i < 4; ++i) {
             Pila<Carta> fundacion = tablero.getFundaciones().get(i);
             if (!fundacion.pilaVacia()) {
@@ -379,29 +395,39 @@ public class Bakersgame {
 
         }
 
+        //Si no se encuentra se imprime regresa un String contenido null
         return "null";
     }
 
+    /**
+     * Metodo para mover cartas entre free cells y tableau y viceversa
+     * @param carta
+     * @param origen
+     * @param indexDestino
+     * @return
+     */
     public boolean freCellYTableau(Carta carta, String origen, int indexDestino)
     {
-
-        System.out.println(indexDestino);
+        //Se verifica el lugar de origen de la carta a moverser
         if (origen.equals("tableau")) {
             ListaSimple<Carta> cascada = tablero.getTableau().get(tablero.localizarCartaTableau(carta));
 
+            //Se verifica si la carta que se quiere mover, su destino esta vacio
             if (cascada.visualizarFin().equals(carta) && tablero.getFreeCells().get(indexDestino).getValor() == -1) {
                 undo.push(cascada.visualizarFin());
                 undoNumeroLugar.push(tablero.localizarCartaTableau(carta));
                 undoLugar.push("tableau");
                 tablero.getFreeCells().set(indexDestino, cascada.eliminarFin());
-
                 return true;
             } else {
                 System.out.println("No se puede meter al free cell");
             }
+
+            //Si no esta en el tableau entonces se verifica si esta en free cells
         } else if (origen.equals("freecell")) {
             ListaSimple<Carta> cascada = tablero.getTableau().get(indexDestino);
 
+            //Ciclo que verifica el lugar de destino y ademas se verifica si es compatible
             for (int i = 0; i < tablero.getFreeCells().size(); ++i) {
                 if (tablero.getFreeCells().get(i).equals(carta)) {
                     if (cascada.listaVacia() && carta.getValor() == 13) {
@@ -429,11 +455,19 @@ public class Bakersgame {
         return false;
     }
 
+    /**
+     * Metodo que mueve cartas a fundacion
+     * @param carta
+     * @param indiceFundacion
+     * @return
+     */
     public boolean moverCartaAFundacion(Carta carta, int indiceFundacion)
     {
+        //Se verifica que el indice de la fundacion sea compatible
         if (indiceFundacion < tablero.getFundaciones().size() && indiceFundacion >= 0) {
             Pila<Carta> fundacion = tablero.getFundaciones().get(indiceFundacion);
 
+            //Se localiza la carta origen
             if (localizarCarta(carta).equals("freecell")) {
                 if (fundacion.pilaVacia() && carta.getValor() == 1) {
                     for (int i = 0; i < tablero.getFreeCells().size(); ++i) {
@@ -459,6 +493,8 @@ public class Bakersgame {
                         }
                     }
                 }
+
+                //Se verifica que la carta origen viene del tableau
             } else if (localizarCarta(carta).equals("tableau")) {
                 ListaSimple<Carta> cascada = tablero.getTableau().get(tablero.localizarCartaTableau(carta));
                 if (fundacion.pilaVacia() && carta.getValor() == 1 && cascada.visualizarFin().equals(carta)) {
@@ -520,13 +556,12 @@ public class Bakersgame {
                     Carta siguiente = cascada.visualizarFin();
                     if (esSecuencialCon(siguiente, actual)) {
 
-                        //Si se cimple la carte eliminada será la nueva actual y se mete a la cascada o carta que se moverá
+                        //Si se cimple la carta eliminada será la nueva actual y se mete a la cascada o carta que se moverá
                         actual = cascada.eliminarFin();
                         cascadaMovimiento.insertarInicio(actual);
                         undo.push(actual);
                         undoNumeroLugar.push(i);
                         undoLugar.push("tableau");
-                        System.out.println("Metido a undo: " + actual + " Indice del lugar: " + i + " Lugar: " + "tableau");
 
                     } else {
                         break;
@@ -565,6 +600,13 @@ public class Bakersgame {
         return false;
     }
 
+    /**
+     * Metodo para verificar si las cartas acumuladas son compatibles con lugar destino
+     * @param destino
+     * @param carta
+     * @param cascadaMovimiento
+     * @return
+     */
     private boolean puedeInsertarse(ListaSimple<Carta> destino, Carta carta, ListaSimple<Carta> cascadaMovimiento)
     {
         if (destino.listaVacia() && carta.getValor() == 13 && cascadaMovimiento.buscar(carta)) {
@@ -577,6 +619,11 @@ public class Bakersgame {
         return false;
     }
 
+    /**
+     * Metodo para mover las cartas
+     * @param cascadaMovimiento
+     * @param destino
+     */
     private void moverCartas(ListaSimple<Carta> cascadaMovimiento, ListaSimple<Carta> destino)
     {
         while (!cascadaMovimiento.listaVacia()) {
@@ -584,6 +631,11 @@ public class Bakersgame {
         }
     }
 
+    /**
+     * Metodo que regresa cartas al lugar origen en dado caso que no hayan sido compatibles
+     * @param cascadaMovimiento
+     * @param emisor
+     */
     private void regresarCartas(ListaSimple<Carta> cascadaMovimiento, ListaSimple<Carta> emisor)
     {
         while (!cascadaMovimiento.listaVacia()) {
@@ -618,17 +670,37 @@ public class Bakersgame {
 
     }
 
+    /**
+     * Metodo para verificar si ya no se pueden hacer movimientos
+     * @return
+     */
     public boolean determinarCartasNoDisp()
     {
+        //Si el metodo de pistas ya no contiene cartas y las free cells estan llenas, entonces ya no hay movimientos disponibles
+        //por lo tanto el juego termino
         return tablero.freeCellsLlenas() && hint().listaVacia();
     }
 
+    /**
+     * Metodo para determinar si se gano el juego
+     * @return
+     */
     public boolean determinarVictoria()
     {
+        //Se utiliza el metodo de fundacionesOrdenadas, el cual verifica si las cuatro fundaciones estan ordenadas
         return tablero.FundacionesOrdenadas();
     }
 
+    /**
+     * Metodo que verifica si dos cartas estan ordenadas secuencialmente, basicamente verifica si un movimiento es valido
+     * @param superior
+     * @param inferior
+     * @return
+     */
     public boolean esSecuencialCon(Carta superior, Carta inferior) {
+
+        //Si son el mismo palo, y si la carta inferior mas uno es igual al valor de la carta superior quiere decir que son
+        //validas
         return superior.getValor() == inferior.getValor() + 1 &&
                 superior.getPalo().equals(inferior.getPalo());
     }
@@ -645,15 +717,12 @@ public class Bakersgame {
         if (!asMovido.isEmpty()) {
 
             for (Map.Entry<Carta, Integer> entry : asMovido.entrySet()) {
-                Carta carta = entry.getKey(); // Obtener la clave (Carta)
-                Integer indice = entry.getValue(); // Obtener el valor (Integer)
+                Carta carta = entry.getKey();
+                Integer indice = entry.getValue();
 
                 undo.push(carta);
                 undoNumeroLugar.push(indice);
                 undoLugar.push("tableau");
-
-                // Imprimir o procesar los valores
-                System.out.println("Carta: " + carta + ", Índice: " + indice);
             }
 
             return true;

@@ -11,7 +11,6 @@ public class BakersgameGUI {
     private Bakersgame bakersgame;
     private Baraja baraja;
     private ArrayList<Carta> origenDestino;
-    private boolean estadoJuego, activadorUndo;
 
     //Atributos GUI
     private Color colorPoker;
@@ -25,8 +24,6 @@ public class BakersgameGUI {
 
     public BakersgameGUI()
     {
-        estadoJuego = false;
-        activadorUndo = true;
         colorPoker = new Color(53,94,59);
         baraja = new Baraja();
         bakersgame = new Bakersgame(baraja);
@@ -112,7 +109,6 @@ public class BakersgameGUI {
                 public void mouseClicked(MouseEvent e) {
                     //Se obtiene el label origen es decir el que se movio
                     JLabel labelPresionado = (JLabel) e.getSource();
-                    System.out.println(identificarCarta((ImageIcon) labelPresionado.getIcon()));
 
                     //Se agrega al array encargado de guardar la carta origen y destino
                     origenDestino.add(identificarCarta((ImageIcon) labelPresionado.getIcon()));
@@ -129,7 +125,6 @@ public class BakersgameGUI {
                                     break;
                                 }
                             }
-                            System.out.println("Carta origen: " + origenDestino.getFirst() + " Carta Destino: " + origenDestino.get(1) + " Indice destino: " + (indiceDestino+1) + " Lugar destino: " + "freeCell");
                             moverCarta(origenDestino.getFirst(), origenDestino.get(1), indiceDestino, "freecell");
                         }
                         origenDestino.clear();
@@ -193,7 +188,6 @@ public class BakersgameGUI {
                     public void mouseClicked(MouseEvent e) {
                         //Se obtiene el label fuente es decir cual se toco
                         JLabel labelPresionado = (JLabel) e.getSource();
-                        System.out.println(identificarCarta((ImageIcon) labelPresionado.getIcon()));
 
                         //Se agrega la carta identificada al arrayList. En esta ocasion solo nos servira cuando sea destino
                         //ya que las fundaciones no pueden salir ya una vez ingresadas
@@ -214,8 +208,6 @@ public class BakersgameGUI {
                                     break;
                                 }
                             }
-
-                            System.out.println("Carta origen: " + origenDestino.getFirst() + " Carta Destino: " + origenDestino.get(1) + " Indice destino: " + (indiceDestino+1) + " Lugar destino: " + "Fundaciones");
                             moverCarta(origenDestino.getFirst(), origenDestino.get(1), indiceDestino, "fundacion");
 
                             origenDestino.clear();
@@ -284,14 +276,12 @@ public class BakersgameGUI {
                         @Override
                         public void mouseClicked(MouseEvent e) {
                             JLabel labelPresionado = (JLabel) e.getSource();
-                            System.out.println(identificarCarta((ImageIcon) labelPresionado.getIcon()));
 
                             origenDestino.add(identificarCarta((ImageIcon) labelPresionado.getIcon()));
                             if (origenDestino.size() == 2) {
 
                                 if (!origenDestino.getFirst().equals(origenDestino.get(1))) {
                                     int indiceDestino = bakersgame.getTablero().localizarCartaTableau(origenDestino.get(1));
-                                    System.out.println("Carta origen: " + origenDestino.getFirst() + " Carta Destino: " + origenDestino.get(1) + " Indice destino: " + (indiceDestino+1) + " Lugar destino: " + "tableau");
                                     moverCarta(origenDestino.getFirst(), origenDestino.get(1), indiceDestino, "tableau");
                                 }
                                 origenDestino.clear();
@@ -337,14 +327,12 @@ public class BakersgameGUI {
                         @Override
                         public void mouseClicked(MouseEvent e) {
                             JLabel labelPresionado = (JLabel) e.getSource();
-                            System.out.println(identificarCarta((ImageIcon) labelPresionado.getIcon()));
 
                             origenDestino.add(identificarCarta((ImageIcon) labelPresionado.getIcon()));
                             if (origenDestino.size() == 2) {
 
                                 if (!origenDestino.getFirst().equals(origenDestino.get(1))) {
                                     int indiceDestino = bakersgame.getTablero().localizarCartaTableau(origenDestino.get(1));
-                                    System.out.println("Carta origen: " + origenDestino.getFirst() + " Carta Destino: " + origenDestino.get(1) + " Indice destino: " + (indiceDestino+1) + " Lugar destino: " + "tableau");
                                     moverCarta(origenDestino.getFirst(), origenDestino.get(1), indiceDestino, "tableau");
                                 }
                                 origenDestino.clear();
@@ -400,7 +388,7 @@ public class BakersgameGUI {
         panelSuperior.add(freeCellWrapper, BorderLayout.WEST);
         panelSuperior.add(fundacionesWrapper, BorderLayout.EAST);
 
-        //Para evitar que Swing compare componentes no compatibles entre si, se desactiva el focus del frame
+        //Como puede generar errores a la hora comparar componentes se desactiva esa opcion para el frame
         frame.setFocusTraversalPolicy(null);
         frame.setFocusTraversalPolicyProvider(false);
 
@@ -415,20 +403,15 @@ public class BakersgameGUI {
     public void actualizarTablero()
     {
 
-        System.out.println(bakersgame.getUndo().elementosComoString() + "UNDO");
-        // Ciclo para poder meter las cartas actuales de tal cascada a la cascada GUI
-
         int mulX = 60;
         int mulY = 70;
 
-        int cartasMovibles = bakersgame.calcularCascadaMovible();
         for (int i = 0; i < 8; ++i) {
             ArrayList<Carta> cascadaArray = transformarCascadaArray(i);
             ArrayList<JLabel> labelsCascada = posicionesCascadas.get(i);
             int tamanyo = cascadaArray.size();
 
             if (tamanyo == 0) {
-                System.out.println("Tamanyo cero mira " + tamanyo);
                 panelTableau.remove(labelsCascada.getFirst());
                 JLabel labelCas = new JLabel();
                 labelCas.setOpaque(true);
@@ -442,7 +425,6 @@ public class BakersgameGUI {
                     @Override
                     public void mouseClicked(MouseEvent e) {
                         JLabel labelPresionado = (JLabel) e.getSource();
-                        System.out.println(identificarCarta((ImageIcon) labelPresionado.getIcon()));
 
                         origenDestino.add(identificarCarta((ImageIcon) labelPresionado.getIcon()));
                         if (origenDestino.size() == 2) {
@@ -455,7 +437,6 @@ public class BakersgameGUI {
                                     break;
                                 }
                             }
-                            System.out.println("Carta origen: " + origenDestino.getFirst() + " Carta Destino: " + origenDestino.get(1) + " Indice destino: " + (indiceDestino+1) + " Lugar destino: " + "Tableau");
                             moverCarta(origenDestino.getFirst(), origenDestino.get(1), indiceDestino, "tableau");
                             origenDestino.clear();
                         } else if (origenDestino.size() == 1) {
@@ -491,7 +472,6 @@ public class BakersgameGUI {
                 }
                 panelTableau.add(labelCas);
                 labelsCascada.add(labelCas);
-                // Eliminar JLabels sobrantes
             } else {
                 for (int j = 0; j < tamanyo; ++j) {
                     JLabel labelCas;
@@ -500,7 +480,7 @@ public class BakersgameGUI {
                         // Usar el JLabel ya existente y moverlo
                         labelCas = labelsCascada.get(j);
                     } else {
-                        // Si no existe, crearlo y asignarle el listener solo una vez
+                        // Si no existe, se crea y se asigna el listener solo una vez
                         labelCas = new JLabel();
                         labelCas.setOpaque(true);
                         labelCas.setBackground(colorPoker);
@@ -509,14 +489,14 @@ public class BakersgameGUI {
                             @Override
                             public void mouseClicked(MouseEvent e) {
                                 JLabel labelPresionado = (JLabel) e.getSource();
-                                System.out.println(identificarCarta((ImageIcon) labelPresionado.getIcon()));
 
                                 origenDestino.add(identificarCarta((ImageIcon) labelPresionado.getIcon()));
                                 if (origenDestino.size() == 2) {
 
-                                    int indiceDestino = bakersgame.getTablero().localizarCartaTableau(origenDestino.get(1));
-                                    System.out.println("Carta origen: " + origenDestino.getFirst() + " Carta Destino: " + origenDestino.get(1) + " Indice destino: " + (indiceDestino+1) + " Lugar destino: " + "Tableau");
-                                    moverCarta(origenDestino.getFirst(), origenDestino.get(1), indiceDestino, "tableau");
+                                    if (!origenDestino.getFirst().equals(origenDestino.get(1))) {
+                                        int indiceDestino = bakersgame.getTablero().localizarCartaTableau(origenDestino.get(1));
+                                        moverCarta(origenDestino.getFirst(), origenDestino.get(1), indiceDestino, "tableau");
+                                    }
                                     origenDestino.clear();
                                 }
                             }
@@ -595,7 +575,6 @@ public class BakersgameGUI {
         // Ciclo para poder meter las cartas actuales de las fundaciones logico a grafico
         for (int i = 0;i < posicionesFundaciones.size(); ++i) {
             ArrayList<Carta> pilaArray = transformarPilaArray(bakersgame.getTablero().getFundaciones().get(i));
-            System.out.println(pilaArray.toString() + "ARRAY");
 
             if (pilaArray.isEmpty()) {
                 for (int j = 0; j < posicionesFundaciones.get(i).size(); ++j) {
@@ -624,8 +603,6 @@ public class BakersgameGUI {
                     }
                 }
             }
-
-
         }
         //Ciclo para checar en cada fundacion si hay cartas, si no hay cartas entonces se debe imprimir el marco solamente
         // del label para simular el espacio de carta vacia. Como utilizamos setVisible(false) desaparecemos toda la carta
@@ -721,9 +698,11 @@ public class BakersgameGUI {
      */
     private boolean moverCarta(Carta origen, Carta destino, int indiceDestino, String destinoString)
     {
-        //Si es null quiere decir que no hay elementos en la parte de donde se encuentra destino
-        System.out.println("Origen: " + origen + " Destino: " + destino + " Indice: " + indiceDestino + " DestinoString: " + destinoString);
+        //El desarrollo se basa en donde se localizan el origen y destino y en base a las zonas identificadas, se utilizan
+        //los metodos especificos en respectivas zonas
 
+        //Ademas si el destino es null, quiere decir que esta vacio el lugar por lo tanto tambien se analiza en base al destino
+        //null
         if (destino == null) {
             if (bakersgame.localizarCarta(origen).equals("tableau")) {
                 if (destinoString.equals("tableau")) {
@@ -783,6 +762,9 @@ public class BakersgameGUI {
         return true;
     }
 
+    /**
+     * Metodo que inicia el juego
+     */
     public void iniciarJuego()
     {
         actualizarTablero();
@@ -864,8 +846,14 @@ public class BakersgameGUI {
         }
     }
 
+    /**
+     * Metodo del boton UNDO
+     */
     private void botonUndo()
     {
+        //Si el labelEstado que es el mensaje del juego final, se encuentra en el panel, quiere decir que ya perdio
+        //o gano, entonces si se presiona undo y el label esta dentro del panel se activan los botones de nuevo para
+        //poder deshacer y tomar el mismo juego en otro punto de partida.
         if (panelTableau.isAncestorOf(labelEstado)) {
             panelTableau.remove(labelEstado);
             panelSuperior.setEnabled(true);
@@ -873,12 +861,17 @@ public class BakersgameGUI {
             botonActualizar.setEnabled(true);
             botonHint.setEnabled(true);
         }
+        //Se usa el metodo UNDO del juego logico
         bakersgame.undo();
         actualizarTablero();
     }
 
+    /**
+     * Metodo para reiniciar el juego ya sea si perdio o gano.
+     */
     private void botonReiniciar()
     {
+        //Se inicializan de nuevo algunos atributos y se desactivan algunos botones
         baraja = new Baraja();
         bakersgame = new Bakersgame(baraja);
         origenDestino = new ArrayList<>(2);
@@ -891,10 +884,11 @@ public class BakersgameGUI {
         botonUndo.setEnabled(true);
         panelTableau.repaint();
         panelTableau.revalidate();
-        estadoJuego = false;
-        activadorUndo = true;
     }
 
+    /**
+     * Metodo no esencial que es el boton para actualizar el tablero grafico
+     */
     private void botonActualizar()
     {
         actualizarTablero();
@@ -908,38 +902,30 @@ public class BakersgameGUI {
         ArrayList<Carta> copia = new ArrayList<>();
         Pila<Carta> temporal = new Pila<>();
 
-        // Paso 1: vaciar en pila temporal y guardar en copia
+        //Se vacia en pila temporal y se guarda la en copia
         while (!pilaOriginal.pilaVacia()) {
             Carta carta = pilaOriginal.pop();
             temporal.push(carta);
-            copia.add(carta); // orden invertido temporalmente
+            copia.add(carta);
         }
 
-        // Paso 2: restaurar pila original
+        //Se restaura la pila original
         while (!temporal.pilaVacia()) {
             pilaOriginal.push(temporal.pop());
         }
 
-        // Paso 3: invertir copia para que quede en el mismo orden que la pila
+        //Se invierte copia para que quede en el mismo orden que la pila
         Collections.reverse(copia);
 
         return copia;
     }
 
     /**
-     * Metodo que restaura una fundacion
+     * Metodo para convertir una lista simple a un array para obtener los elementos de manera mas sencilla a la hora
+     * obtener las imagenes
+     * @param indice
+     * @return
      */
-    public void transformarPilaArrayToPila(ArrayList<Carta> lista, int indiceFundacion) {
-        Pila<Carta> nuevaPila = new Pila<>();
-
-        // Agregar cartas desde el final del ArrayList para que la pila tenga el orden correcto
-        for (int i = lista.size() - 1; i >= 0; i--) {
-            nuevaPila.push(lista.get(i));
-        }
-
-        bakersgame.getTablero().getFundaciones().set(indiceFundacion, nuevaPila);
-    }
-
     public ArrayList<Carta> transformarCascadaArray(int indice) {
         ArrayList<Carta> cascadaCarta = new ArrayList<>();
         while (!bakersgame.getTablero().getTableau().get(indice).listaVacia()) {
@@ -948,20 +934,16 @@ public class BakersgameGUI {
         return cascadaCarta;
     }
 
+    /**
+     * Metodo que obtiene el arrayList y lo convierte de nuevo a la lista simple del juego.
+     * @param cascadaCarta
+     * @param indice
+     */
     public void transformarCascadaLista(ArrayList<Carta> cascadaCarta, int indice) {
-        // Restauramos de forma inversa si insertarInicio mete al principio
+        //Se restaura de forma inversa
         while (!cascadaCarta.isEmpty()) {
             Carta carta = cascadaCarta.removeFirst();
             bakersgame.getTablero().getTableau().get(indice).insertarFin(carta);
         }
     }
-
-    public ArrayList<Carta> transformarFundaciones()
-    {
-        return null;
-    }
-
-
-
-
 }

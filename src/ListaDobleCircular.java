@@ -89,30 +89,6 @@ public class ListaDobleCircular<T> {
         return objeto;
     }
 
-    public void ordenarLista() {
-        if (inicio == null || inicio == fin) {
-            return;
-        }
-
-        boolean swapped;
-        do {
-            swapped = false;
-            NodoDoble<T> actual = inicio;
-
-            do {
-                NodoDoble<T> siguiente = actual.getSiguiente();
-                if (((Comparable<T>) actual.getInfo()).compareTo(siguiente.getInfo()) > 0) {
-                    T temp = actual.getInfo();
-                    actual.setInfo(siguiente.getInfo());
-                    siguiente.setInfo(temp);
-
-                    swapped = true;
-                }
-                actual = siguiente;
-            } while (actual != fin);
-        } while (swapped);
-    }
-
     public String mostrarRecursivo() {
         if (inicio == null) {
             return "Lista vacía";

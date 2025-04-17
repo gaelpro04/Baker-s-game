@@ -110,46 +110,6 @@ public class ListaSimple<T> {
         return builder.append("null").toString();
     }
 
-    public String mostrarLista()
-    {
-        StringBuilder builder = new StringBuilder();
-
-        Nodo<T> recorrer = inicio;
-
-        while (recorrer != null) {
-            builder.append(recorrer.getInfo() + " ");
-            recorrer = recorrer.getSig();
-        }
-
-        return builder.toString();
-    }
-
-    public void ordenarLista()
-    {
-        if (inicio == null || inicio.getSig() == null) {
-            System.out.println("Lista vacia o con un elemento");
-            return;
-        } else {
-            boolean ordenado;
-            do {
-                ordenado = true;
-                Nodo<T> nodoBasico = inicio;
-
-                while (nodoBasico.getSig() != null) {
-
-                    if (((Comparable<T>) nodoBasico.getInfo()).compareTo(nodoBasico.getSig().getInfo()) > 0) {
-                        T datoTemp = nodoBasico.getInfo();
-                        nodoBasico.setInfo(nodoBasico.getSig().getInfo());
-                        nodoBasico.getSig().setInfo(datoTemp);
-                        ordenado = false;
-                    }
-                    nodoBasico = nodoBasico.getSig();
-                }
-
-            } while (!ordenado);
-        }
-    }
-
     public int tamanio()
     {
         int contador = 0;
@@ -213,7 +173,6 @@ public class ListaSimple<T> {
                 }
             }
         }
-
         return false;
     }
 }
